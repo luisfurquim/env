@@ -17,7 +17,7 @@ type GooseG struct {
 }
 
 var timeFormat reflect.Type = reflect.TypeOf(time.Time{})
-var duarionFormat reflect.Type = reflect.TypeOf(time.Duration{})
+var durationFormat reflect.Type = reflect.TypeOf(time.Duration(0))
 
 var reFloatFormat *regexp.Regexp = regexp.MustCompile(`^\%[beEfFgGxX]$`)
 
@@ -26,6 +26,7 @@ var Goose GooseG = GooseG{
 }
 
 var ErrInvalidType error = errors.New("Invalid type")
+var ErrInvalidFormat error = errors.New("Invalid format")
 var ErrMissingRequiredVariable  error = errors.New("Missing required variable")
 var ErrInvalidRequiredPolicy error = errors.New("Invalid required policy")
 
@@ -54,7 +55,7 @@ func Read(d interface{}) error {
 
 	data = data.Elem()
 
-	if data.Kind != reflect.Struct {
+	if data.Kind() != reflect.Struct {
 		Goose.Env.Logf(1, "Input parameter must point to a struct type: %s", ErrInvalidType)
 		return ErrInvalidType
 	}
@@ -73,22 +74,21 @@ func Read(d interface{}) error {
 
 		if sval, ok = os.LookupEnv(tag); !ok {
 			if sval, ok = fld.Tag.Lookup("default"); !ok {
-				sval, ok = fld.Tag.Lookup("required") {
-					if !ok {
-						continue
-					}
-
-					sval = strings.ToLower(sval)
-					if sval == "yes" || sval == "true" {
-						return ErrMissingRequiredVariable
-					}
-
-					if sval == "no" || sval == "false" {
-						continue
-					}
-
-					return ErrInvalidRequiredPolicy
+				sval, ok = fld.Tag.Lookup("required")
+				if !ok {
+					continue
 				}
+
+				sval = strings.ToLower(sval)
+				if sval == "yes" || sval == "true" {
+					return ErrMissingRequiredVariable
+				}
+
+				if sval == "no" || sval == "false" {
+					continue
+				}
+
+				return ErrInvalidRequiredPolicy
 			}
 		}
 
@@ -101,7 +101,7 @@ func Read(d interface{}) error {
 		
 		if fldTyp == timeFormat {
 			if format, ok = fld.Tag.Lookup("format"); !ok {
-				format = time.DateTime
+				format = "2006-01-02 15:04:05"
 			}
 
 			tmval, err = time.Parse(format, sval)
@@ -110,7 +110,7 @@ func Read(d interface{}) error {
 				return err
 			}
 
-			fldRef.Set(tmval)
+			fldRef.Set(reflect.ValueOf(tmval))
 
 			continue
 		}
@@ -122,7 +122,7 @@ func Read(d interface{}) error {
 				return err
 			}
 
-			fldRef.SetInt(dval)
+			fldRef.SetInt(int64(dval))
 
 			continue
 		}
@@ -179,4 +179,6 @@ func Read(d interface{}) error {
 			return ErrInvalidType
 		}
 	}
+
+	return nil
 }
