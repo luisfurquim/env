@@ -140,7 +140,7 @@ func Read(d interface{}) error {
 			fldRef.SetInt(ival)
 
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			_, err = fmt.Sscanf(sval, "%u", &uival)
+			_, err = fmt.Sscanf(sval, "%d", &uival)
 			if err != nil {
 				Goose.Env.Logf(1, "Error scanning %s uint value for %s environment variable: %s", sval, tag, err)
 				return err
