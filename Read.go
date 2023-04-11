@@ -92,6 +92,8 @@ func Read(d interface{}) error {
 			}
 		}
 
+		Goose.Env.Logf(2,"tag:%s = sval:%s", tag, sval)
+
 		fldRef = data.Field(i)
 		fldTyp = fld.Type
 		if fldTyp.Kind() == reflect.Pointer {
