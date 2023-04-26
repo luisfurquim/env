@@ -81,6 +81,7 @@ func Read(d interface{}) error {
 
 				sval = strings.ToLower(sval)
 				if sval == "yes" || sval == "true" {
+					Goose.Env.Logf(1,"%s:%s", ErrMissingRequiredVariable, tag)
 					return ErrMissingRequiredVariable
 				}
 
