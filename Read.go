@@ -93,7 +93,7 @@ func Read(d interface{}) error {
 			}
 		}
 
-		Goose.Env.Logf(4,"Env:%s = %s", tag, sval)
+		Goose.Env.Logf(5,"Env:%s = %s", tag, sval)
 
 		fldRef = data.Field(i)
 		fldTyp = fld.Type
